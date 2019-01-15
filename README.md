@@ -6,9 +6,9 @@ There4u is a api app which enable thee customers to make order and resturant own
 
 #### System requirenments
 
-> Python 2.7.12
-> Postgresql 9.5
-> Django 1.11
+> Python 2.7.12<br/>
+> Postgresql 9.5<br/>
+> Django 1.11<br/>
 
 
 ### Instructions 
@@ -53,13 +53,13 @@ There4u is a api app which enable thee customers to make order and resturant own
 
 3. Install and use virtual env wrapper http://virtualenvwrapper.readthedocs.org/en/latest/#introduction
 
-> sudo pip install virtualenvwrapper
-> export WORKON_HOME=~/Envs
-> mkdir -p $WORKON_HOME
-> source /usr/local/bin/virtualenvwrapper.sh
-> mkvirtualenv env1
-> workon env1
-> deactivate
+> sudo pip install virtualenvwrapper<br/>
+> export WORKON_HOME=~/Envs<br/>
+> mkdir -p $WORKON_HOME<br/>
+> source /usr/local/bin/virtualenvwrapper.sh<br/>
+> mkvirtualenv env1<br/>
+> workon env1<br/>
+> deactivate<br/>
    
 **We need to put statements 2 & 4 in our ~/.bashrc file**
 
@@ -77,9 +77,9 @@ once in logged in terminal window to access set variables
 
 3. Install JDK (Optional Oracle JDK) 
 
-> sudo apt-add-repository ppa:webupd8team/java
-> sudo apt-get update
-> sudo apt-get install oracle-java8-installer
+> sudo apt-add-repository ppa:webupd8team/java<br/>
+> sudo apt-get update<br/>
+> sudo apt-get install oracle-java8-installer<br/>
 
 4. Install python dependencies
 
@@ -90,9 +90,9 @@ once in logged in terminal window to access set variables
 1. Press Ctrl + Shift + P to open Command Palette, Select Python: Create Terminal to start the terminal
 
 2. Then run following commands 
-> $ workon env1
-> $ python manage.py migrate to run migrations
-> $ python manage.py runserver
+> $ workon env1<br/>
+> $ python manage.py migrate to run migrations<br/>
+> $ python manage.py runserver<br/>
 
 3. Open http://127.0.0.1:8000/ in your browser.
 
