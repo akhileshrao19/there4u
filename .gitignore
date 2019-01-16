@@ -3,3 +3,6 @@
 *.pyc
 db.json
 db.xml
+.keep
+urls.list.txt
+db1.json
