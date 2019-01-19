@@ -2,25 +2,39 @@
 from __future__ import unicode_literals
 
 from django.contrib import admin
-# from django.contrib.auth.admin import UserAdmin
 from .models import User, City, State, Pin
 
+'''
+Register model with admin app
+'''
 
-# Register your models here.
+
 
 class UserAdmin(admin.ModelAdmin):
-    list_display = ['email', 'first_name', 'last_name', 'city', 'state', 'pin']
+    '''
+    UserAdmin to be use with django admin app.
+    '''
+    list_display = ['email', 'id', 'first_name', 'last_name', 'city', 'state', 'pin']
 
 
 class CityAdmin(admin.ModelAdmin):
+    '''
+    CityAdmin to be use with django admin app.
+    '''
     list_display = ['name']
 
 
 class StateAdmin(admin.ModelAdmin):
+    '''
+    StateAdmin to be use with django admin app.
+    '''
     list_display = ['name']
 
 
 class PinAdmin(admin.ModelAdmin):
+    '''
+    PinAdmin to be use with django admin app.
+    '''
     list_display = ['code']
 
 

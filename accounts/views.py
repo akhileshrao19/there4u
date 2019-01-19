@@ -1,38 +1,76 @@
-# # -*- coding: utf-8 -*-
-# from __future__ import unicode_literals
+# pylint:disable=E1101
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 
 
-# from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model
 
-# from rest_framework import generics, views, response
-# from rest_framework.permissions import IsAuthenticated, IsAdminUser
-# from rest_framework.decorators import permission_classes as permission_classes_deco
-
-# from .serializer import UserCreateSerializer, UserRUDSerializer
-
-# User = get_user_model()
-
-# ######
-# # class UserViewSet(viewsets.ModelViewSet):
-# #     queryset = User.objects.all()
-# #     serializer_class = UserSerializer
-# ######
+from rest_framework.views import APIView
+from rest_framework.viewsets import GenericViewSet
+from rest_framework import mixins, response, status
+from rest_framework.permissions import IsAdminUser, BasePermission
+from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.authtoken.models import Token
 
 
-# class UserCreateView(generics.CreateAPIView):
-#     permission_classes = []
-#     queryset = User.objects.all()
-#     serializer_class = UserCreateSerializer
-#     queryset = User.objects.all()
+from .serializers import UserSerializer
+User = get_user_model()
 
 
-# class UserRudView(generics.RetrieveUpdateDestroyAPIView):
-#     permission_classes = [IsAuthenticated]
-#     lookup_field = 'pk'
-#     queryset = User.objects.all()
-#     serializer_class = UserRUDSerializer
-#     queryset = User.objects.all()
+class IsAdminOrSelf(BasePermission):
+    """
+    Object-level permission to only allow modifications to a User object
+    if the request.user is an administrator or you are modifying your own
+    user object.
+    """
 
-#     @permission_classes_deco((IsAdminUser))
-#     def delete(self, request, *args, **kwargs):
-#         super().delete(request, *args, **kwargs)
+    def has_object_permission(self, request, view, obj):
+        return request.user.is_staff or request.user == obj
+
+
+class UserView(mixins.CreateModelMixin,
+               mixins.RetrieveModelMixin,
+               mixins.UpdateModelMixin,
+               mixins.DestroyModelMixin,
+               GenericViewSet):
+    """
+    retrieve:
+        Return user details
+
+    create:
+        Create new User
+
+    destroy:
+        Delete user from the db
+
+    update:
+        Update user details in db
+
+    partial_update:
+        Update partial of user detail
+    """
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+    def get_permissions(self):
+        """
+        Instantiates and returns the list of permissions that this view requires.
+        """
+        if self.action == 'create':
+            permission_classes = []
+        elif self.action == 'list':
+            permission_classes = [IsAdminUser]
+        else:
+            permission_classes = [IsAdminOrSelf]
+        return [permission() for permission in permission_classes]
+
+
+class AuthView(APIView):
+    '''
+    Auth View handle auth related operations logout (remove auth token from the db).
+    '''
+    def delete(self, request, *args, **kwrds):
+        if request.user.is_authenticated:
+            Token.objects.get(user=request.user).delete()
+            return response.Response(status=status.HTTP_204_NO_CONTENT)
+        return response.Response(status=status.HTTP_401_UNAUTHORIZED)

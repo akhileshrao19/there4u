@@ -41,7 +41,8 @@ INSTALLED_APPS = [
 
     'rest_framework',
     'rest_framework.authtoken',
-    'django_extensions',
+    'rest_framework_swagger',
+    
 
     'accounts',
     'restaurants',
@@ -140,7 +141,7 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication',
         'rest_framework.authentication.SessionAuthentication',
     ),
-    'DEFAULT_PERMISSION_CLASSES' : (
-        'rest_framework.permissions.IsAuthenticated'
-    )
 }
+
+LOGIN_URL = 'rest_framework:login'
+LOGOUT_URL = 'rest_framework:logout'

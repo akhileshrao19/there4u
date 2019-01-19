@@ -2,9 +2,9 @@
 from __future__ import unicode_literals
 
 from django.db import models
-from restaurants.models import Menu
 from django.contrib.auth import get_user_model
 
+from restaurants.models import Menu
 
 # Create your models here.
 
@@ -52,9 +52,10 @@ class Order(models.Model):
 class OrderDetail(models.Model):
     order = models.ForeignKey(
         Order, on_delete=models.PROTECT, related_name='order_detail')
-    
-    item = models.ForeignKey(Menu, on_delete=models.SET_NULL, related_name='in_order', null=True)
-    
+
+    item = models.ForeignKey(
+        Menu, on_delete=models.SET_NULL, related_name='in_order', null=True)
+
     quantity = models.PositiveIntegerField(
         default=0, verbose_name='order quantity')
 

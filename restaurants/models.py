@@ -4,13 +4,11 @@ from __future__ import unicode_literals
 from django.db import models
 from django.contrib.auth import get_user_model
 
-# Create your models here.
 User = get_user_model()
 
 
 class Restaurant(models.Model):
     name = models.CharField(max_length=255, unique=True)
-    # owner = models.ManyToManyField(User, related_name=owners, related_query_name=owners)
 
     def __unicode__(self):
         return self.name
