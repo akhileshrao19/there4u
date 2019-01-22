@@ -8,10 +8,10 @@ from django.shortcuts import render
 
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework.permissions import IsAdminUser, AllowAny
+from rest_framework.decorators import action
 
 from .models import Restaurant, Dish
 from .serializers import RestaurantSerializer, DishSerializer
-# Create your views here.
 
 
 class RestaurantView(ModelViewSet):
@@ -37,14 +37,17 @@ class RestaurantView(ModelViewSet):
     queryset = Restaurant.objects.all()
     serializer_class = RestaurantSerializer
 
+    @action(detail=True,  methods=['patch'])
+    def menu(self, request, pk):
+
+        pass
+
     def get_permissions(self):
         '''
         Instantiates and returns the list of permissions that this view requires.
         '''
         if self.action == 'create' or self.action == 'destroy' or self.action == 'update' or self.action == 'partial_update':
             permission_classes = [IsAdminUser]
-        # elif self.action == 'update' or self.action == 'partial_update':
-        #     permission_classes = [IsAdminOrOwner]
         else:
             permission_classes = [AllowAny]
         return [permission() for permission in permission_classes]

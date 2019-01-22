@@ -14,7 +14,6 @@ from rest_framework.authtoken.models import Token
 from .models import User, City, State, Pin
 from accounts.views import UserView
 
-# Create your tests here.
 
 class UserSetup(APITestCase):
     def setUp(self):
@@ -33,16 +32,18 @@ class UserSetup(APITestCase):
             'state': 'xyz',
             'pin': '123123'
         }
-        
-        user = {'email': 'asd@gmail.com',
-                'password': 'asdfasdf', }
-        user.update(self.person_data_obj)
-        self.user = User.objects.create_user(**user)
-        
-        user2= {'email': 'asdfasdf@c.com',
-                'password': 'asdfasdf'}
-        user2.update(self.person_data_obj)
-        self.user2 = User.objects.create_user(**user2)
+
+        self._user = {'email': 'asd@gmail.com',
+                      'password': 'asdfasdf', }
+
+        self._user.update(self.person_data_obj)
+        self.user = User.objects.create_user(**self._user)
+
+        self._user2 = {'email': 'asdfasdf@c.com',
+                       'password': 'asdfasdf'}
+        self._user2.update(self.person_data_obj)
+
+        self.user2 = User.objects.create_user(**self._user2)
 
 
 class CreateUser(UserSetup):
@@ -50,6 +51,7 @@ class CreateUser(UserSetup):
     Test the Create User operation of Api.
     Insuffient data,  duplicate data and successful user creation is tested.
     '''
+
     def test_create_user(self):
         data = {'email': 'asdd@gmail.com',
                 'password': 'asdfasdf',
@@ -70,7 +72,7 @@ class CreateUser(UserSetup):
             'pin': self.person_data['pin'],
             'state': self.person_data['state'],
             'restaurant': [],
-            'token' : response.data['token']
+            'token': response.data['token']
         }
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -106,6 +108,7 @@ class CreateUser(UserSetup):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(json.loads(response.content), expected_data)
 
+
 class RetreiveUser(UserSetup):
     '''
     Test the Retreive User operation of Api.
@@ -122,7 +125,7 @@ class RetreiveUser(UserSetup):
 
     def test_retreive_user_forbidden(self):
         new_user = {'email': 'asasd@gmail.com',
-                'password': 'asdfasdf', }
+                    'password': 'asdfasdf', }
         new_user.update(self.person_data_obj)
         new_user = User.objects.create_user(**new_user)
 
@@ -153,11 +156,12 @@ class RetreiveUser(UserSetup):
             'pin': self.person_data['pin'],
             'state': self.person_data['state'],
             'restaurant': [],
-            'token' : response.data['token']
-        }  
+            'token': response.data['token']
+        }
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(json.loads(response.content), expected_data)
+
 
 class UpdateUser(UserSetup):
     '''
@@ -187,7 +191,8 @@ class UpdateUser(UserSetup):
         self.client.force_login(user=self.user)
 
         url = reverse('users:user-detail', kwargs={'pk': _id})
-        response = self.client.patch(url, {'first_name': 'jaideep'}, format='json')
+        response = self.client.patch(
+            url, {'first_name': 'jaideep'}, format='json')
 
         expected_data = {
             'id': b64encode(str(_id)),
@@ -200,12 +205,12 @@ class UpdateUser(UserSetup):
             'pin': self.person_data['pin'],
             'state': self.person_data['state'],
             'restaurant': [],
-            'token' : response.data['token'] 
+            'token': response.data['token']
         }
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(json.loads(response.content), expected_data)
-    
+
     def test_update_user_put(self):
         _id = User.objects.get(email=self.user.email).id
 
@@ -215,7 +220,7 @@ class UpdateUser(UserSetup):
 
         data = {
             'email': 'asd@gmail.com',
-            'password' : 'asdfasdfasdf',
+            'password': 'asdfasdfasdf',
             'first_name': 'jaideep',
             'last_name': 'asdf',
             'balance': 1000,
@@ -243,6 +248,7 @@ class UpdateUser(UserSetup):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(json.loads(response.content), expected_data)
 
+
 class DeleteUser(UserSetup):
     '''
     Test the Delete User operation of Api.
@@ -269,3 +275,27 @@ class DeleteUser(UserSetup):
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(response.data, expected_data)
+
+
+class AuthUser(UserSetup):
+
+    def setUp(self):
+        super(AuthUser, self).setUp()
+        self.url = reverse('users:api-auth')
+
+    def test_login(self):
+
+        response = self.client.post(self.url, {
+                                    'username': self._user['email'], 'password': self._user['password']}, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['token'], self.user.token)
+
+    def test_logout(self):
+        self.client.force_authenticate(user=self.user)
+        self.user.token
+
+        response = self.client.delete(self.url, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(len(Token.objects.filter(user=self.user)), 0)

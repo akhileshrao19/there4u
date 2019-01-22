@@ -1,4 +1,4 @@
-
+#pylint:disable=E1101
 from django.contrib.auth import authenticate
 from django.contrib.auth import get_user_model
 
@@ -13,6 +13,10 @@ from .models import RestaurantOwnerMap, Restaurant, Menu, Dish
 class DishSerializer(serializers.ModelSerializer):
     def to_representation(self, data):
         return data.name
+    
+    def to_internal_value(self, data):
+        print data
+        return Dish.objects.get_or_create(name=data.lower())
     class Meta:
         model = Dish
         fields = ['name']
@@ -24,17 +28,20 @@ class RestaurantMenu(serializers.ModelSerializer):
 
     class Meta:
         model = Menu
-        fields = ('id', 'dish', 'rate')
+        fields = ('id', 'dish', 'rate', 'restaurant')
         depth = 2
         extra_kwrgs = {
             'id':{
                 'read_only':True
+                },
+            'restaurant':{
+                'write_only':True
                 }
             }
 
 
 class RestaurantSerializer(serializers.ModelSerializer):
-    menu = RestaurantMenu(many=True)
+    menu = RestaurantMenu(many=True, read_only=True)
     url = serializers.HyperlinkedIdentityField(
         view_name="restaurants:restaurant-detail", lookup_field='pk')
     
@@ -42,6 +49,7 @@ class RestaurantSerializer(serializers.ModelSerializer):
     class Meta:
         model = Restaurant
         fields = ('id', 'url', 'name', 'menu')
+
 
 
 class RestaurantOwnerSerializer(serializers.ModelSerializer):

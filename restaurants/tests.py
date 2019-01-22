@@ -6,8 +6,6 @@ from django.test import TestCase
 from accounts.tests import UserSetup
 from .models import Restaurant, RestaurantOwnerMap, Dish, Menu
 
-# Create your tests here.
-
 
 class RestaurantSetup(UserSetup):
     def setUp(self):
@@ -18,4 +16,4 @@ class RestaurantSetup(UserSetup):
         dishes = [Dish.objects.create(name=dish) for dish in (
             'test_dish1', 'test_dish2', 'test_dish3')]
         self.menu = [Menu.objects.create(restaurant=self.restaurant, dish=dish, rate=rate, quantity=quantity)
-                for dish, rate, quantity in zip(dishes, (30, 40, 50), (5, 7, 9))]
+                     for dish, rate, quantity in zip(dishes, (30, 40, 50), (5, 7, 9))]

@@ -57,7 +57,7 @@ class OrderSerializer(serializers.ModelSerializer):
         if self.instance is not None:
             qs = OrderDetail.objects.filter(order=self.instance)[0]
             restaurant = qs.item.restaurant
-            
+
         else:
             restaurant = order_details[0]['item'].restaurant
 
@@ -110,9 +110,9 @@ class OrderSerializer(serializers.ModelSerializer):
         request = self.context.get('request', None)
 
         order_details = validated_data.pop('order_detail')
-        
+
         previous_orders = OrderDetail.objects.filter(order=instance)
-        
+
         total_amount = 0
         for previous_order in previous_orders:
             total_amount += previous_order.quantity*previous_order.item.rate

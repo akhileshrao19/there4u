@@ -5,8 +5,6 @@ from django.contrib import admin
 
 from .models import Order, OrderDetail
 
-# Register your models here.
-
 
 class OrderDetailAdmin(admin.ModelAdmin):
     list_display = ['order', 'item', 'quantity']

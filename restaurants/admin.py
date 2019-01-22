@@ -5,9 +5,6 @@ from django.contrib import admin
 from .models import Restaurant, Menu, Dish, RestaurantOwnerMap
 
 
-# Register your models here.
-
-
 class RestaurantAdmin(admin.ModelAdmin):
     list_display = ['id', 'name']
 

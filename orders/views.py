@@ -31,7 +31,11 @@ class IsAdminOrSelf(BasePermission):
         return request.user.is_staff or request.user == obj.user
 
 
-class OrderView(mixins.CreateModelMixin, mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.ListModelMixin, GenericViewSet):
+class OrderView(mixins.CreateModelMixin,
+                mixins.RetrieveModelMixin,
+                mixins.UpdateModelMixin,
+                mixins.ListModelMixin,
+                GenericViewSet):
     '''
     retrieve:
         Return order details,  authentication required.
@@ -93,7 +97,7 @@ class OrderView(mixins.CreateModelMixin, mixins.RetrieveModelMixin, mixins.Updat
         try:
             order = Order.objects.get(pk=pk)
             if not request.user.is_staff and order.user != request.user:
-                return Response({'detail': "order not belong touser"},status=status.HTTP_403_FORBIDDEN)
+                return Response({'detail': "order not belong touser"}, status=status.HTTP_403_FORBIDDEN)
             elif order.status >= IN_PROGRESS:
                 raise PermissionDenied(detail="order already in progress")
         except Order.DoesNotExist:
@@ -118,10 +122,10 @@ class OrderView(mixins.CreateModelMixin, mixins.RetrieveModelMixin, mixins.Updat
     def search(self, request):
         restaurant = request.GET.get('restaurant', None)
         item = request.GET.get('item', None)
-        
+
         item = item.lower() if item is not None else None
         restaurant = restaurant.lower() if restaurant is not None else None
-        
+
         query_set = self.serach_query(request, restaurant, item)
 
         serializer = self.serializer_class(query_set, many=True)

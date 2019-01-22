@@ -27,7 +27,8 @@ class CitySerializer(serializers.RelatedField):
         return value.name
 
     def to_internal_value(self, data):
-        return City.objects.get_or_create(name__iexact=data)[0]
+        data = data.lower()
+        return City.objects.get_or_create(name=data)[0]
 
 
 class StateSerializer(serializers.RelatedField):
@@ -41,7 +42,8 @@ class StateSerializer(serializers.RelatedField):
         return value.name
 
     def to_internal_value(self, data):
-        return State.objects.get_or_create(name__iexact=data)[0]
+        data = data.lower()
+        return State.objects.get_or_create(name=data)[0]
 
 
 class PinSerializer(serializers.RelatedField):
@@ -53,8 +55,8 @@ class PinSerializer(serializers.RelatedField):
 
     def pinValidator(self, data):
         if re.match(r'^[0-9]{6}$', str(data)) is None:
-            raise serializers.ValidationError(
-                'Pin must be 6 digit numerical value')
+            raise serializers.ValidationError({'detail':
+                                               'Pin must be 6 digit numerical value'})
         return True
 
     def to_representation(self, value):
@@ -62,7 +64,7 @@ class PinSerializer(serializers.RelatedField):
 
     def to_internal_value(self, data):
         self.pinValidator(data)
-        return Pin.objects.get_or_create(code__iexact=data)[0]
+        return Pin.objects.get_or_create(code=data)[0]
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -73,9 +75,12 @@ class UserSerializer(serializers.ModelSerializer):
     '''
     url = serializers.HyperlinkedIdentityField(
         view_name='users:user-detail', lookup_field='pk', read_only=True)
-    city = CitySerializer(queryset=City.objects.all(), help_text='city of user, required')
-    state = StateSerializer(queryset=State.objects.all(), help_text='state of user, required')
-    pin = PinSerializer(queryset=Pin.objects.all(), help_text='pincode of user,  must be six digit numeric value, required' )
+    city = CitySerializer(queryset=City.objects.all(),
+                          help_text='city of user, required')
+    state = StateSerializer(queryset=State.objects.all(),
+                            help_text='state of user, required')
+    pin = PinSerializer(queryset=Pin.objects.all(
+    ), help_text='pincode of user,  must be six digit numeric value, required')
     id = serializers.SerializerMethodField()
     restaurant = RestaurantOwnerSerializer(
         many=True, read_only=True, required=False)
@@ -108,25 +113,30 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ('id', 'url', 'email', 'password', 'first_name',
                   'last_name', 'balance', 'city', 'pin', 'state', 'restaurant', 'token')
         extra_kwargs = {
-                        'email': {
-                            'help_text':'email field, need to be unique, will be trated as username, required'
-                        },
-                        'password': {   
-                                'write_only': True,
-                                'help_text': 'password for the account, required'
-                        },
-                        'first_name' :{
-                                'help_text': 'user first_name, required'
-                        },
-                        'last_name' : {
-                            'help_text' : 'user last_name'
-                        },
-                        'balance' : {
-                            'help_text' : 'user balance, default is 0, value must be integer',
-                            'read_only' : True
-                        },
-                        'token' : {
-                            'help_text': 'user authentication token',
-                            'read_only': True
-                        }
+            'email': {
+                'help_text': 'email field, need to be unique, will be trated as username, required'
+            },
+            'password': {
+                'write_only': True,
+                'help_text': 'password for the account, required'
+            },
+            'first_name': {
+                'help_text': 'user first_name, required'
+            },
+            'last_name': {
+                'help_text': 'user last_name'
+            },
+            'balance': {
+                'help_text': 'user balance, default is 0, value must be integer',
+                'read_only': True
+            },
+            'token': {
+                'help_text': 'user authentication token',
+                'read_only': True
+            }
         }
+
+
+class AuthSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = ('email', 'password')

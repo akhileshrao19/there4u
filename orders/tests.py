@@ -18,9 +18,6 @@ from restaurants.tests import RestaurantSetup
 from accounts.views import UserView
 
 
-# Create your tests here.
-
-
 class OrderSetup(RestaurantSetup):
     def setUp(self):
         super(OrderSetup, self).setUp()

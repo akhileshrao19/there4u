@@ -6,7 +6,6 @@ from django.contrib.auth import get_user_model
 
 from restaurants.models import Menu
 
-# Create your models here.
 PLACED = 0
 ACCEPTED = 1
 IN_PROGRESS = 2
@@ -16,7 +15,7 @@ CANCELLED = 5
 REJECTED = 6
 
 ORDER_STATUS = {
-    PLACED : 'placed',
+    PLACED: 'placed',
     ACCEPTED: 'accpted',
     IN_PROGRESS: 'in progress',
     DISPATCHED: 'dispatched',
@@ -45,7 +44,6 @@ class Order(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     status = models.IntegerField(
         choices=ORDER_STATUS_l, default=PLACED)
-    # items = models.ManyToManyField(Menu, related_name='in_orders', related_query_name='in_orders')
 
     def __unicode__(self):
         return '{}-#-{}-#-{}-#-{}'.format(self.pk, self.user, self.created_at, ORDER_STATUS[self.status])

@@ -1,13 +1,5 @@
 # pylint:disable=E1101
 # -*- coding: utf-8 -*-
-'''
-Models belonging to user are defined here
-Pin model store Pincode
-State model store State name
-City model store State name
-User model is extention of AbstractBase user to remove username from AbstractUser.
-'''
-
 from __future__ import unicode_literals
 
 import re
@@ -63,27 +55,29 @@ class City (models.Model):
     City model hold the records of city and user model connected to it via foreign key.
     '''
 
-    name = models.CharField(
-        max_length=255, verbose_name='city name', unique=True)
+    name = models.CharField(blank=False,
+                            max_length=255, verbose_name='city name', unique=True)
 
     def __unicode__(self):
         return self.name
-    
-    def clean_name(self):
-        return self.cleaned_data['name'].lower()
+
+    def save(self, *args, **kwargs):
+        self.name = self.name.lower()
+        return super(City, self).save(*args, **kwargs)
+
 
 class Pin(models.Model):
     '''
     Pin model hold the records of pin codes and user model connected to it via foreign key.
     '''
-    code = models.CharField(verbose_name='city pin code',
+    code = models.CharField(verbose_name='city pin code', blank=False,
                             max_length=6, unique=True)
 
-    def clean_code(self ):
-        if not re.match(r'^[0-9]{6}$', self.cleaned_data['code']):
+    def save(self, *args, **kwargs):
+        if not re.match(r'^[0-9]{6}$', str(self.code)):
             raise ValidationError({'detail':
-                'Pin code should be 6 digit long'})
-        return self.cleaned_data['code']
+                                   'Pin code should be 6 digit long'})
+        return super(Pin, self).save(*args, **kwargs)
 
     def __unicode__(self):
         return self.code
@@ -99,8 +93,10 @@ class State(models.Model):
     def __unicode__(self):
         return self.name
 
-    def clean_name(self):
-        return self.cleaned_data['name'].lower()
+    def save(self, *args, **kwargs):
+        self.name = self.name.lower()
+        return super(State, self).save(*args, **kwargs)
+
 
 class User (AbstractUser):
     '''
@@ -127,6 +123,7 @@ class User (AbstractUser):
     @property
     def name(self):
         return '{} {}'.format(self.first_name, self.last_name)
+
     @property
     def token(self):
         return Token.objects.get_or_create(user=self)[0].key

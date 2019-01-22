@@ -11,7 +11,7 @@ from rest_framework import mixins, response, status
 from rest_framework.permissions import IsAdminUser, BasePermission, IsAuthenticated
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
-from rest_framework.decorators import api_view
+from rest_framework.decorators import action
 from rest_framework.response import Response
 
 
@@ -30,14 +30,10 @@ class IsAdminOrSelf(BasePermission):
         return request.user.is_staff or request.user == obj
 
 
-#############################################################################################
-#List mixin is extra functionality , use for development only,  need to remove in production#
-#############################################################################################
 class UserView(mixins.CreateModelMixin,
                mixins.RetrieveModelMixin,
                mixins.UpdateModelMixin,
                mixins.DestroyModelMixin,
-               mixins.ListModelMixin,
                GenericViewSet):
     '''
     retrieve:
@@ -58,13 +54,6 @@ class UserView(mixins.CreateModelMixin,
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
-    def list(self, request, *args, **kwargs):
-        if request.user.is_staff:
-            return super(UserView, self).list(request, *args, **kwargs)
-        else :
-            serializer =  self.serializer_class(request.user, context={'request': request} )
-            return Response(serializer.data,  status=status.HTTP_200_OK)
-
     def get_permissions(self):
         """
         Instantiates and returns the list of permissions that this view requires.
@@ -82,7 +71,7 @@ class AuthView(ObtainAuthToken):
     '''
     Handle auth related operations logout (remove auth token from the db).
     '''
-    # @api_view(['DELETE'])
+
     def delete(self, request, *args, **kwrds):
         if request.user.is_authenticated:
             Token.objects.get(user=request.user).delete()
