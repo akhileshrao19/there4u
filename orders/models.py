@@ -7,17 +7,18 @@ from django.contrib.auth import get_user_model
 from restaurants.models import Menu
 
 # Create your models here.
-
-IN_PROGRESS = 1
-ACCEPTED = 2
+PLACED = 0
+ACCEPTED = 1
+IN_PROGRESS = 2
 DISPATCHED = 3
 DELIVERED = 4
 CANCELLED = 5
 REJECTED = 6
 
 ORDER_STATUS = {
-    IN_PROGRESS: 'in progress',
+    PLACED : 'placed',
     ACCEPTED: 'accpted',
+    IN_PROGRESS: 'in progress',
     DISPATCHED: 'dispatched',
     DELIVERED: 'delivered',
     CANCELLED: 'cancelled',
@@ -30,6 +31,7 @@ User = get_user_model()
 
 class Order(models.Model):
     ORDER_STATUS_l = (
+        (PLACED, 'placed'),
         (IN_PROGRESS, 'in progress'),
         (ACCEPTED, 'accepted'),
         (DISPATCHED, 'dispatched'),
@@ -39,14 +41,14 @@ class Order(models.Model):
     )
     user = models.ForeignKey(
         User, on_delete=models.PROTECT, related_name='orders')
-    created_date = models.DateTimeField(auto_now_add=True)
-    updated_date = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     status = models.IntegerField(
-        choices=ORDER_STATUS_l, default=IN_PROGRESS)
+        choices=ORDER_STATUS_l, default=PLACED)
     # items = models.ManyToManyField(Menu, related_name='in_orders', related_query_name='in_orders')
 
     def __unicode__(self):
-        return '{}-#-{}-#-{}-#-{}'.format(self.pk, self.user, self.created_date, ORDER_STATUS[self.status])
+        return '{}-#-{}-#-{}-#-{}'.format(self.pk, self.user, self.created_at, ORDER_STATUS[self.status])
 
 
 class OrderDetail(models.Model):

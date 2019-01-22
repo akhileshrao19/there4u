@@ -8,9 +8,11 @@ from django.contrib.auth import get_user_model
 from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet
 from rest_framework import mixins, response, status
-from rest_framework.permissions import IsAdminUser, BasePermission
+from rest_framework.permissions import IsAdminUser, BasePermission, IsAuthenticated
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 
 
 from .serializers import UserSerializer
@@ -28,12 +30,16 @@ class IsAdminOrSelf(BasePermission):
         return request.user.is_staff or request.user == obj
 
 
+#############################################################################################
+#List mixin is extra functionality , use for development only,  need to remove in production#
+#############################################################################################
 class UserView(mixins.CreateModelMixin,
                mixins.RetrieveModelMixin,
                mixins.UpdateModelMixin,
                mixins.DestroyModelMixin,
+               mixins.ListModelMixin,
                GenericViewSet):
-    """
+    '''
     retrieve:
         Return user details
 
@@ -48,9 +54,16 @@ class UserView(mixins.CreateModelMixin,
 
     partial_update:
         Update partial of user detail
-    """
+    '''
     queryset = User.objects.all()
     serializer_class = UserSerializer
+
+    def list(self, request, *args, **kwargs):
+        if request.user.is_staff:
+            return super(UserView, self).list(request, *args, **kwargs)
+        else :
+            serializer =  self.serializer_class(request.user, context={'request': request} )
+            return Response(serializer.data,  status=status.HTTP_200_OK)
 
     def get_permissions(self):
         """
@@ -59,16 +72,17 @@ class UserView(mixins.CreateModelMixin,
         if self.action == 'create':
             permission_classes = []
         elif self.action == 'list':
-            permission_classes = [IsAdminUser]
+            permission_classes = [IsAuthenticated]
         else:
             permission_classes = [IsAdminOrSelf]
         return [permission() for permission in permission_classes]
 
 
-class AuthView(APIView):
+class AuthView(ObtainAuthToken):
     '''
-    Auth View handle auth related operations logout (remove auth token from the db).
+    Handle auth related operations logout (remove auth token from the db).
     '''
+    # @api_view(['DELETE'])
     def delete(self, request, *args, **kwrds):
         if request.user.is_authenticated:
             Token.objects.get(user=request.user).delete()

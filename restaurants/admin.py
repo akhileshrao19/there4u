@@ -17,7 +17,7 @@ class RestaurantOwnerMapAdmin(admin.ModelAdmin):
 
 
 class MenuAdmin(admin.ModelAdmin):
-    list_display = ['restaurant', 'dish', 'rate']
+    list_display = ['id', 'restaurant', 'dish', 'rate', 'quantity']
 
 
 class DishAdmin(admin.ModelAdmin):

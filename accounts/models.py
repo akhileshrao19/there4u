@@ -1,3 +1,4 @@
+# pylint:disable=E1101
 # -*- coding: utf-8 -*-
 '''
 Models belonging to user are defined here
@@ -16,6 +17,7 @@ from django.contrib.auth.models import UserManager as ParentUserManager
 from django.core.validators import RegexValidator
 from django.db import models
 from django.core.exceptions import ValidationError
+from rest_framework.authtoken.models import Token
 
 
 class UserManager(ParentUserManager):
@@ -61,27 +63,27 @@ class City (models.Model):
     City model hold the records of city and user model connected to it via foreign key.
     '''
 
-    name = models.CharField(max_length=255, verbose_name='city name')
+    name = models.CharField(
+        max_length=255, verbose_name='city name', unique=True)
 
     def __unicode__(self):
         return self.name
-
-    def save(self, *args, **kwrgs):
-        self.name = self.name.lower()
-        return super(City, self).save(*args, **kwrgs)
-
+    
+    def clean_name(self):
+        return self.cleaned_data['name'].lower()
 
 class Pin(models.Model):
     '''
     Pin model hold the records of pin codes and user model connected to it via foreign key.
     '''
-    code = models.CharField(verbose_name='city pin code', max_length=6)
+    code = models.CharField(verbose_name='city pin code',
+                            max_length=6, unique=True)
 
-    def full_clean(self, exclude=None, validate_unique=True):
-        super(Pin, self).full_clean(exclude, validate_unique)
-        if not re.match(r'^[0-9]{6}$', self.code):
-            raise ValidationError(
-                'Pin code should be 6 digit long')
+    def clean_code(self ):
+        if not re.match(r'^[0-9]{6}$', self.cleaned_data['code']):
+            raise ValidationError({'detail':
+                'Pin code should be 6 digit long'})
+        return self.cleaned_data['code']
 
     def __unicode__(self):
         return self.code
@@ -92,31 +94,17 @@ class State(models.Model):
     State model hold the records of state name and user model connected to it via foreign key.
     '''
     name = models.CharField(max_length=255, blank=False,
-                            null=False, verbose_name='state name')
+                            null=False, verbose_name='state name', unique=True)
 
     def __unicode__(self):
         return self.name
 
-    def save(self, *args, **kwrgs):
-        self.name = self.name.lower()
-        return super(State, self).save(*args, **kwrgs)
-
+    def clean_name(self):
+        return self.cleaned_data['name'].lower()
 
 class User (AbstractUser):
     '''
     User model is extention of AbstractUser provideing basic details of for user.
-    It holds following fileds:-
-    id:- unique id assigned to every account created
-    password :- password use for login to system
-    last_login :- last time user login with its credentials
-    is_superuser :- Designates that this user has all permissions without explicitly assigning them.
-    first_name :- first name.
-    last_name :- last name.
-    is_staff :- Designates whether the user can log into this admin site
-    is_active :- Designates whether this user should be treated as active. Unselect this instead of deleting accounts.
-    date_joined :- date the user created  its account
-    email :- unique email field, treated as username,
-    balance :- balance in user account.
     '''
     username = None
     first_name = models.CharField(
@@ -133,6 +121,12 @@ class User (AbstractUser):
 
     objects = UserManager()
 
+    def clean_email(self):
+        return self.cleaned_data['email'].lower()
+
     @property
     def name(self):
         return '{} {}'.format(self.first_name, self.last_name)
+    @property
+    def token(self):
+        return Token.objects.get_or_create(user=self)[0].key

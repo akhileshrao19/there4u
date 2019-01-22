@@ -14,6 +14,5 @@ router.register(r'users', UserView)
 
 urlpatterns = [
     url(r'^', include(router.urls)),
-    url(r'^auth/$', obtain_auth_token, name='api-auth-token' ),
-    url(r'^auth/$', AuthView.as_view(), name='api-auth-logout')
+    url(r'^auth/$', AuthView.as_view(), name='api-auth-logout'),
 ]

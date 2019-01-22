@@ -13,7 +13,7 @@ class OrderDetailAdmin(admin.ModelAdmin):
 
 
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ['user', 'status', 'created_date', 'updated_date']
+    list_display = ['id', 'user', 'status', 'created_at', 'updated_at']
 
 
 admin.site.register(Order, OrderAdmin)

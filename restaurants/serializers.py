@@ -20,7 +20,7 @@ class DishSerializer(serializers.ModelSerializer):
 
 
 class RestaurantMenu(serializers.ModelSerializer):
-    dish = DishSerializer(many=False, read_only=True)
+    dish = DishSerializer( read_only=True)
 
     class Meta:
         model = Menu
@@ -36,7 +36,7 @@ class RestaurantMenu(serializers.ModelSerializer):
 class RestaurantSerializer(serializers.ModelSerializer):
     menu = RestaurantMenu(many=True)
     url = serializers.HyperlinkedIdentityField(
-        view_name="restaurant:restaurant-detail", lookup_field='pk')
+        view_name="restaurants:restaurant-detail", lookup_field='pk')
     
 
     class Meta:
@@ -45,7 +45,7 @@ class RestaurantSerializer(serializers.ModelSerializer):
 
 
 class RestaurantOwnerSerializer(serializers.ModelSerializer):
-    url = serializers.HyperlinkedIdentityField(view_name= "restaurant:restaurant-detail",)
+    url = serializers.HyperlinkedIdentityField(view_name= "restaurants:restaurant-detail",)
     class Meta:
         model = RestaurantOwnerMap
         fields = ('id', 'url','restaurant')

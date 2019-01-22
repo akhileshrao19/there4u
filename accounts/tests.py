@@ -16,32 +16,40 @@ from accounts.views import UserView
 
 # Create your tests here.
 
-class CreateUser(APITestCase):
-    '''
-    Test the Create User operation of Api.
-    Insuffient data,  duplicate data and successful user creation is tested.
-    '''
+class UserSetup(APITestCase):
     def setUp(self):
         self.url = reverse('users:user-list')
-        self.person_data_obj = {'first_name': 'a',
-                                'last_name': 'b',
+        self.person_data_obj = {'first_name': 'test',
+                                'last_name': 'user',
                                 'city':  City.objects.get_or_create(name='abc')[0],
                                 'state': State.objects.get_or_create(name='xyz')[0],
                                 'pin': Pin.objects.get_or_create(code='123123')[0],
                                 }
 
         self.person_data = {
-            'first_name': 'a',
-            'last_name': 'b',
+            'first_name': 'test',
+            'last_name': 'user',
             'city': 'abc',
             'state': 'xyz',
             'pin': '123123'
         }
+        
         user = {'email': 'asd@gmail.com',
                 'password': 'asdfasdf', }
         user.update(self.person_data_obj)
         self.user = User.objects.create_user(**user)
+        
+        user2= {'email': 'asdfasdf@c.com',
+                'password': 'asdfasdf'}
+        user2.update(self.person_data_obj)
+        self.user2 = User.objects.create_user(**user2)
 
+
+class CreateUser(UserSetup):
+    '''
+    Test the Create User operation of Api.
+    Insuffient data,  duplicate data and successful user creation is tested.
+    '''
     def test_create_user(self):
         data = {'email': 'asdd@gmail.com',
                 'password': 'asdfasdf',
@@ -61,7 +69,8 @@ class CreateUser(APITestCase):
             'city': self.person_data['city'],
             'pin': self.person_data['pin'],
             'state': self.person_data['state'],
-            'restaurant': []
+            'restaurant': [],
+            'token' : response.data['token']
         }
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -97,32 +106,11 @@ class CreateUser(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(json.loads(response.content), expected_data)
 
-class RetreiveUser(APITestCase):
+class RetreiveUser(UserSetup):
     '''
     Test the Retreive User operation of Api.
     unauthorised user,  forbidden user and successful user retreival is tested.
     '''
-    def setUp(self):
-        self.person_data_obj = {'first_name': 'a',
-                                'last_name': 'b',
-                                'city':  City.objects.get_or_create(name='abc')[0],
-                                'state': State.objects.get_or_create(name='xyz')[0],
-                                'pin': Pin.objects.get_or_create(code='123123')[0],
-                                }
-
-        self.person_data = {
-            'first_name': 'a',
-            'last_name': 'b',
-            'city': 'abc',
-            'state': 'xyz',
-            'pin': '123123'
-        }
-
-        user = {'email': 'asd@gmail.com',
-                'password': 'asdfasdf', }
-        user.update(self.person_data_obj)
-
-        self.user = User.objects.create_user(**user)
 
     def test_retreive_user_unauthorised(self):
 
@@ -146,7 +134,6 @@ class RetreiveUser(APITestCase):
         response = self.client.get(url, format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-
     def test_retreive_user(self):
         _id = User.objects.get(email=self.user.email).id
 
@@ -165,38 +152,18 @@ class RetreiveUser(APITestCase):
             'city': self.person_data['city'],
             'pin': self.person_data['pin'],
             'state': self.person_data['state'],
-            'restaurant': []
+            'restaurant': [],
+            'token' : response.data['token']
         }  
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(json.loads(response.content), expected_data)
 
-class UpdateUser(APITestCase):
+class UpdateUser(UserSetup):
     '''
     Test the Update User operation of Api.
     unauthorised user, put and patch, authorised user put and patch is tested.
     '''
-    def setUp(self):
-        self.person_data_obj = {'first_name': 'a',
-                                'last_name': 'b',
-                                'city':  City.objects.get_or_create(name='abc')[0],
-                                'state': State.objects.get_or_create(name='xyz')[0],
-                                'pin': Pin.objects.get_or_create(code='123123')[0],
-                                }
-
-        self.person_data = {
-            'first_name': 'a',
-            'last_name': 'b',
-            'city': 'abc',
-            'state': 'xyz',
-            'pin': '123123'
-        }
-
-        user = {'email': 'asd@gmail.com',
-                'password': 'asdfasdf', }
-        user.update(self.person_data_obj)
-
-        self.user = User.objects.create_user(**user)
 
     def test_update_user_patch_unauth(self):
 
@@ -232,7 +199,8 @@ class UpdateUser(APITestCase):
             'city': self.person_data['city'],
             'pin': self.person_data['pin'],
             'state': self.person_data['state'],
-            'restaurant': []
+            'restaurant': [],
+            'token' : response.data['token'] 
         }
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -253,7 +221,7 @@ class UpdateUser(APITestCase):
             'balance': 1000,
             'city': self.person_data['city'],
             'pin': self.person_data['pin'],
-            'state': self.person_data['state'],
+            'state': self.person_data['state']
         }
 
         response = self.client.put(url, data, format='json')
@@ -268,30 +236,18 @@ class UpdateUser(APITestCase):
             'city': self.person_data['city'],
             'pin': self.person_data['pin'],
             'state': self.person_data['state'],
-            'restaurant': []
+            'restaurant': [],
+            'token': response.data['token']
         }
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(json.loads(response.content), expected_data)
 
-class DeleteUser(APITestCase):
+class DeleteUser(UserSetup):
     '''
     Test the Delete User operation of Api.
     unauthorised user,and authorised user delete is tested.
     '''
-    def setUp(self):
-        self.person_data_obj = {'first_name': 'a',
-                                'last_name': 'b',
-                                'city':  City.objects.get_or_create(name='abc')[0],
-                                'state': State.objects.get_or_create(name='xyz')[0],
-                                'pin': Pin.objects.get_or_create(code='123123')[0],
-                                }
-
-        user = {'email': 'asd@gmail.com',
-                'password': 'asdfasdf', }
-        user.update(self.person_data_obj)
-
-        self.user = User.objects.create_user(**user)
 
     def test_delete_user_unauth(self):
 

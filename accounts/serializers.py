@@ -7,6 +7,7 @@ import re
 from django.contrib.auth import get_user_model
 
 from rest_framework import serializers, exceptions
+from rest_framework.authtoken.models import Token
 
 from accounts.models import Pin, City, State
 from restaurants.serializers import RestaurantOwnerSerializer
@@ -26,7 +27,7 @@ class CitySerializer(serializers.RelatedField):
         return value.name
 
     def to_internal_value(self, data):
-        return City.objects.get_or_create(name=data)[0]
+        return City.objects.get_or_create(name__iexact=data)[0]
 
 
 class StateSerializer(serializers.RelatedField):
@@ -40,7 +41,7 @@ class StateSerializer(serializers.RelatedField):
         return value.name
 
     def to_internal_value(self, data):
-        return State.objects.get_or_create(name=data)[0]
+        return State.objects.get_or_create(name__iexact=data)[0]
 
 
 class PinSerializer(serializers.RelatedField):
@@ -61,11 +62,7 @@ class PinSerializer(serializers.RelatedField):
 
     def to_internal_value(self, data):
         self.pinValidator(data)
-        return Pin.objects.get_or_create(code=data)[0]
-
-    def create(self, validated_data):
-        print validated_data
-        return Pin.objects.get_or_create(name='asdfas')
+        return Pin.objects.get_or_create(code__iexact=data)[0]
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -76,10 +73,10 @@ class UserSerializer(serializers.ModelSerializer):
     '''
     url = serializers.HyperlinkedIdentityField(
         view_name='users:user-detail', lookup_field='pk', read_only=True)
-    city = CitySerializer(many=False, queryset=City.objects.all(), help_text='city of user, required')
-    state = StateSerializer(many=False, queryset=State.objects.all(), help_text='state of user, required')
+    city = CitySerializer(queryset=City.objects.all(), help_text='city of user, required')
+    state = StateSerializer(queryset=State.objects.all(), help_text='state of user, required')
     pin = PinSerializer(queryset=Pin.objects.all(), help_text='pincode of user,  must be six digit numeric value, required' )
-    id = serializers.SerializerMethodField(read_only=True)
+    id = serializers.SerializerMethodField()
     restaurant = RestaurantOwnerSerializer(
         many=True, read_only=True, required=False)
 
@@ -109,7 +106,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('id', 'url', 'email', 'password', 'first_name',
-                  'last_name', 'balance', 'city', 'pin', 'state', 'restaurant')
+                  'last_name', 'balance', 'city', 'pin', 'state', 'restaurant', 'token')
         extra_kwargs = {
                         'email': {
                             'help_text':'email field, need to be unique, will be trated as username, required'
@@ -125,6 +122,11 @@ class UserSerializer(serializers.ModelSerializer):
                             'help_text' : 'user last_name'
                         },
                         'balance' : {
-                            'help_text' : 'user balance, default is 0, value must be integer'
+                            'help_text' : 'user balance, default is 0, value must be integer',
+                            'read_only' : True
+                        },
+                        'token' : {
+                            'help_text': 'user authentication token',
+                            'read_only': True
                         }
         }

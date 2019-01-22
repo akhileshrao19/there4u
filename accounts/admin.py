@@ -14,7 +14,7 @@ class UserAdmin(admin.ModelAdmin):
     '''
     UserAdmin to be use with django admin app.
     '''
-    list_display = ['email', 'id', 'first_name', 'last_name', 'city', 'state', 'pin']
+    list_display = ['email', 'id', 'first_name', 'last_name', 'city', 'state', 'pin', 'balance']
 
 
 class CityAdmin(admin.ModelAdmin):
