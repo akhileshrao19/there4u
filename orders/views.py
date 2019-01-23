@@ -88,16 +88,28 @@ class OrderView(mixins.CreateModelMixin,
         return query_set.distinct()
 
     def list(self, request, *args, **kwargs):
+        '''
+        orderby = 1 -> order_by restaurant
+        orderby = 2 -> order_by amount 
+        '''
         if not request.user.is_staff:
             self.queryset = request.user.orders
-        return super(OrderView, self).list(request,  *args, **kwargs)
+        order = request.GET.get('order', None)
+        query = self.queryset.filter(user=request.user)
+        if order == 1:
+            query = sorted(query, key=lambda x:x.order_detail.all()[0].item.restaurant.name)
+        elif order == 2:
+            query  = sorted(query, key=lambda x: x.amount)
+        serializer = self.serializer_class(query, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+        # return super(OrderView, self).list(request,  *args, **kwargs)
 
     @action(detail=True, methods=['delete'])
     def cancel(self, request, pk):
         try:
             order = Order.objects.get(pk=pk)
             if not request.user.is_staff and order.user != request.user:
-                return Response({'detail': "order not belong touser"}, status=status.HTTP_403_FORBIDDEN)
+                return Response({'detail': "order not belong to user"}, status=status.HTTP_403_FORBIDDEN)
             elif order.status >= IN_PROGRESS:
                 raise PermissionDenied(detail="order already in progress")
         except Order.DoesNotExist:

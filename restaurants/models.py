@@ -16,7 +16,7 @@ class Restaurant(models.Model):
 
 class RestaurantOwnerMap(models.Model):
     restaurant = models.ForeignKey(
-        Restaurant, related_name='owner', on_delete=models.PROTECT)
+        Restaurant, related_name='owners', on_delete=models.PROTECT)
     owner = models.ForeignKey(User, related_name='restaurant',
                               on_delete=models.PROTECT)
 

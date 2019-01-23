@@ -20,11 +20,11 @@ User = get_user_model()
 
 
 class IsAdminOrSelf(BasePermission):
-    """
+    '''
     Object-level permission to only allow modifications to a User object
     if the request.user is an administrator or you are modifying your own
     user object.
-    """
+    '''
 
     def has_object_permission(self, request, view, obj):
         return request.user.is_staff or request.user == obj
@@ -54,6 +54,9 @@ class UserView(mixins.CreateModelMixin,
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
+    # def list(self, request):
+    #     pass
+
     def get_permissions(self):
         """
         Instantiates and returns the list of permissions that this view requires.
@@ -61,7 +64,7 @@ class UserView(mixins.CreateModelMixin,
         if self.action == 'create':
             permission_classes = []
         elif self.action == 'list':
-            permission_classes = [IsAuthenticated]
+            permission_classes = [IsAdminUser]
         else:
             permission_classes = [IsAdminOrSelf]
         return [permission() for permission in permission_classes]

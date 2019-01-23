@@ -1,8 +1,11 @@
+# pylint:disable=E1101
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
 from django.db import models
+from django.db.models import F, Sum
 from django.contrib.auth import get_user_model
+
 
 from restaurants.models import Menu
 
@@ -47,6 +50,10 @@ class Order(models.Model):
 
     def __unicode__(self):
         return '{}-#-{}-#-{}-#-{}'.format(self.pk, self.user, self.created_at, ORDER_STATUS[self.status])
+
+    @property
+    def amount(self):
+        return self.order_detail.aggregate(total=Sum(F('quantity')*F('item__rate')))['total']
 
 
 class OrderDetail(models.Model):
