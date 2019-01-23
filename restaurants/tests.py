@@ -89,3 +89,5 @@ class RetreiveMenu(RestaurantSetup):
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(json.loads(res.content), expected_data)
+    
+    
